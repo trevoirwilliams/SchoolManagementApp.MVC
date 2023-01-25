@@ -1,0 +1,78 @@
+@model SchoolManagementApp.MVC.Models.ClassEnrollmentViewModel
+
+@{
+    ViewData["Title"] = "Manage Enrollments";
+}
+
+<h2>Manage Enrollments for @Model.Class.Time Session of @Model.Class.CourseName </h2>
+<h3>Instructor: @Model.Class.LecturerName </h3>
+
+<hr/>
+<h3>Student List</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model.Students) {
+        <tr>
+            <td>@student.FirstName</td>
+            <td>@student.LastName</td>
+            <td>
+                @* @if(student.IsEnrolled){
+                    <button data-studentId="@student.Id" data-shouldEnroll="false" class="btn btn-danger enrollemntBtn" type="button">Remove</button>
+                }else{
+                    <button data-studentId="@student.Id" data-shouldEnroll="true" class="btn btn-success enrollemntBtn" type="button">Add</button>
+                } *@
+
+                @{
+                    string btnText = student.IsEnrolled ? "Remove" : "Add";
+                    string btnClass = student.IsEnrolled ? "danger" : "success";
+                    bool shouldEnroll = !student.IsEnrolled;
+                }
+                <button data-studentId="@student.Id" data-shouldEnroll="@shouldEnroll" class="btn btn-@btnClass enrollemntBtn" type="button">@btnText</button>
+                
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<form asp-action="EnrollStudent" id="classEnrollmentForm">
+    <input type="hidden" id="classid" name="ClassId" value="@Model.Class.Id"/>
+    <input type="hidden" id="studentId" name="StudentId"/>
+    <input type="hidden" id="shouldEnroll" name="ShouldEnroll"/>
+</form>
+
+@section Scripts{
+    <script>
+        $(function(){
+            $('.table').DataTable();
+            
+            $('.enrollemntBtn').click(function(e){
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Please confirm this action",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Confirm Enrollment'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            var btn = $(this);
+                            var studentId = btn.attr("data-studentId");
+                            var shouldEnroll = btn.attr("data-shouldEnroll");
+                            $('#studentId').val(studentId);
+                            $('#shouldEnroll').val(shouldEnroll);
+                            $('#classEnrollmentForm').submit();
+                        }
+                    })
+            })
+        })
+    </script>
+}
